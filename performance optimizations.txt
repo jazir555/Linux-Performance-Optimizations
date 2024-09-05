@@ -505,74 +505,113 @@ blktrace -d /dev/sda
 Adjust Kernel Panic Settings
 
 Configure the system to automatically reboot after a kernel panic
+
 sysctl -w kernel.panic=10
 sysctl -w kernel.panic_on_oops=1
+
 Optimize Inotify Watches
 Increase the number of inotify watches to handle more file events
+
 sysctl -w fs.inotify.max_user_watches=524288
+
 Enable TCP Window Scaling
 Improve TCP performance by enabling window scaling
+
 sysctl -w net.ipv4.tcp_window_scaling=1
+
 Enable TCP Keepalive Probes
 Configure TCP keepalive probes to manage idle connections
+
 sysctl -w net.ipv4.tcp_keepalive_time=300
 sysctl -w net.ipv4.tcp_keepalive_intvl=60
 sysctl -w net.ipv4.tcp_keepalive_probes=5
+
 Optimize TCP Congestion Control Algorithms
 Experiment with different TCP congestion control algorithms to find the best fit for your workload
+
 sysctl -w net.ipv4.tcp_congestion_control=bbr
+
 Use schedtool for Advanced CPU Scheduling
 Install and use schedtool to control CPU scheduling policies
+
 apt-get install schedtool
 schedtool -R -p 20 -e myapp
+
 Enable Kernel Samepage Merging (KSM)
 Use KSM to reduce memory usage by merging identical memory pages
+
 echo 1 > /sys/kernel/mm/ksm/run
 
 Optimize Network Buffer Sizes
 Increase network buffer sizes to handle high traffic volumes
+
 sysctl -w net.core.rmem_max=16777216
 sysctl -w net.core.wmem_max=16777216
+
 Optimize Kernel Scheduler
 Adjust kernel scheduler settings for better performance
+
 echo 1 > /proc/sys/kernel/sched_autogroup_enabled
+
 Adjust rcu Settings for Low-Latency Systems
 Tune Read-Copy Update (RCU) settings for low-latency performance
+
 echo 0 > /sys/kernel/rcu_expedited
+
 Optimize Filesystem Journaling
 Choose the appropriate journaling mode for your filesystem (e.g., data=writeback for ext4)
+
 mount -o remount,data=writeback /dev/sda1
+
 Enable and Configure BBRv2 TCP Congestion Control
 Use BBRv2 for even better TCP congestion control performance
+
 echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf
 sysctl -p
+
 Optimize File System Performance with tune2fs
 Use tune2fs to optimize ext4 filesystem parameters
+
 tune2fs -o journal_data_writeback /dev/sda1
+
 Use ethtool to Optimize NIC Settings
 Fine-tune NIC settings for better network performance
+
 ethtool -K eth0 tso off
 
 Enable and Configure Network Interface Teaming
 Use network interface teaming for load balancing and failover
+
 apt-get install ifenslave
+
 Use irqbalance for Balancing Interrupts
 Install and configure irqbalance to distribute interrupts across CPUs
+
 apt-get install irqbalance
+
 Tune Kernel Semaphore Parameters
 Adjust semaphore settings for better performance with IPC-heavy applications
+
 sysctl -w kernel.sem="250 32000 100 128"
+
 Configure and Use ethtool for Network Optimization
 Use ethtool to optimize network interface settings
+
 ethtool -K eth0 rx off tx off
+
 Enable TCP Small Queues (TSQ)
 Optimize the TCP stack by enabling TSQ
+
 sysctl -w net.ipv4.tcp_limit_output_bytes=131072
+
 Enable and Configure EarlyOOM
 Use EarlyOOM to handle out-of-memory situations more gracefully
+
 apt-get install earlyoom
+
 Optimize Inode Cache
 Adjust inode cache settings to handle large numbers of files
+
 sysctl -w fs.inode-nr
 sysctl -w fs.inode-state
 
