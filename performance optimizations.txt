@@ -1,0 +1,674 @@
+Optimizing Linux
+Disable THP
+https://www.pingcap.com/blog/transparent-huge-pages-why-we-disable-it-for-databases/
+Tuned-ADM
+https://manpages.ubuntu.com/manpages/jammy/man7/tuned-profiles.7.html
+Change Init Level to 3
+Set your init level to 3 if the default is set to 5. Use the command “init 3” to set the init level to 3, then reboot for the changes to take effect. You can click the link below for instructions on how to do so.
+
+https://www.cyberciti.biz/howto/question/linux/changing-run-levels-3-5.php
+
+More info on that here
+
+This link is how to do the reverse, changing 5 to 3 if the “init 3” command does not work. If your run level is set to 5, change it to 3.
+Optimizing Linux Github
+https://github.com/sn99/Optimizing-linux
+
+Great repo for how to optimize linux performance.
+Stacer
+https://www.site24x7.com/learn/linux/linux-performance-optimization.html
+
+Stacer is a tool used for optimizing Linux that deletes unwanted cache and sorting processes by looking at memory usage and CPU. Stacer reveals how services and processes are performing and which user is executing the processes. 
+
+Performance Optimization Tools and Techniques
+https://linuxconfig.org/linux-performance-optimization-tools-and-techniques
+Enable Z-Swap
+https://blog.jacobstoner.com/zswap-improve-memory-performance-on-linux/
+
+sudo perl -pi -e 's/^(GRUB_CMDLINE_LINUX_DEFAULT.*)"$/$1 zswap.enabled=1 
+
+zswap.compressor=lz4 zswap.zpool=z3fold zswap.max_pool_percent=25"/' /etc/default/grub
+
+sudo update-grub
+
+sudo echo -e 'lz4\nlz4_compress\nz3fold' >> /etc/initramfs-tools/modules
+
+sudo update-initramfs -u
+
+sudo reboot
+Tune the Linux Filesystem for increased performance
+Foss Linux Article
+https://www.fosslinux.com/111937/tips-and-tricks-for-optimizing-linux-device-performance.htm
+
+Semi-suface level, but slightly different info than the linux.com article, best to use both of the many listed techniques together.
+Use a Custom Kernel
+https://www.fosslinux.com/111937/tips-and-tricks-for-optimizing-linux-device-performance.htm
+Disable Unnecessary Linux Services
+To list all services, you can use this command:
+
+systemctl list-unit-files --type=service
+
+Then, to disable a service, use:
+
+sudo systemctl disable SERVICE_NAME
+Jumbo Frames
+Enabling Jumbo Frames:
+
+●	Check if your network adapter supports Jumbo Frames: ethtool eth0
+
+●	Enable Jumbo Frames by setting a larger MTU (Maximum Transmission Unit), typically 9000 bytes for Ethernet: ifconfig eth0 mtu 9000 or ip link set dev eth0 mtu 9000
+
+●	Verify the changes: ifconfig eth0 or ip addr show eth0
+
+●	Remember to configure Jumbo Frames on all devices in your network to avoid packet fragmentation.
+
+Jumbo Frames can help reduce CPU load by decreasing the number of packets processed, but it's crucial to ensure that all network equipment supports them to avoid potential network issues. Contact your hosting provider to ensure enabling this feature is supported.
+TCP BBR
+Increase Linux Internet speed with TCP BBR congestion control
+https://www.cyberciti.biz/cloud-computing/increase-your-linux-server-internet-speed-with-tcp-bbr-congestion-control/
+
+https://www.techrepublic.com/article/how-to-enable-tcp-bbr-to-improve-network-speed-on-linux/
+
+https://www.linuxbabe.com/ubuntu/enable-google-tcp-bbr-ubuntu
+
+https://github.com/systemd/systemd/issues/9725#issuecomment-413369212
+
+https://djangocas.dev/blog/huge-improve-network-performance-by-change-tcp-congestion-control-to-bbr/
+Linux Network Performance Parameters
+https://github.com/leandromoreira/linux-network-performance-parameters
+Intel’s VPS Wordpress Tuning guide for Xeon Systems
+https://www.intel.com/content/www/us/en/developer/articles/guide/wordpress-tuning-guide-on-xeon-systems.html
+Linux Optimization suggestions for the Steam Deck
+These are Linux optimizations for the Steam Deck, however they are also applicable to Linux VPS optimization. Below is the Medium article I pulled these commands from, as well as reversion commands for each of these optimization features in case you want to revert for any reason.
+
+Paste all of these commands as one single code block, not single lines one at a time. The reversion commands should not be run together with the commands to enable these features, only if you want to disable them and revert back to stock. 
+Medium Article
+https://medium.com/@a.b.t./here-are-some-possibly-useful-tweaks-for-steamos-on-the-steam-deck-fcb6b571b577#6c57
+Switching over to the “performance” CPU governor at start-up
+
+(paste this into your terminal as one giant code block, do not run the commands individually)
+
+cat << EOF | sudo tee /etc/systemd/system/cpu_performance.service
+[Unit]
+Description=CPU performance governor
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/cpupower frequency-set -g performance
+[Install]
+WantedBy=multi-user.target
+EOF
+sudo systemctl daemon-reload
+sudo systemctl enable cpu_performance.service
+
+To undo or revert this change, run: 
+
+sudo systemctl disable cpu_performance.service
+MGLRU (Multi-Gen. Least Recently Used)
+This is one of the most recent additions to the upstream Linux kernel, literally just merged for the 6.1 LTS (Long-Term Support). However, the upstream kernel doesn’t enable this functionality by default, yet.
+
+(paste this into your terminal as one giant code block, do not run the commands individually)
+
+To enable this feature, run the terminal command:
+
+cat << EOF | sudo tee /etc/tmpfiles.d/mglru.conf
+w /sys/kernel/mm/lru_gen/enabled - - - - 7
+w /sys/kernel/mm/lru_gen/min_ttl_ms - - - - 0
+EOF
+
+Reversion command:
+
+sudo rm /etc/tmpfiles.d/mglru.conf
+Unlocking the memory lock
+By default, the Linux kernel sets this particular value to just 64KiB, which is the maximum amount of memory the kernel will lock within a single operation. This is an old recommendation. 
+
+This command will set this value to 2 GB, adjust as needed depending on your server’s RAM capacity:
+
+(paste this into your terminal as one giant code block, do not run the commands individually)
+
+cat << EOF | sudo tee /etc/security/limits.d/memlock.conf
+* hard memlock 2147484
+* soft memlock 2147484
+EOF
+
+This site will help you convert the values so you can replace the above value “2147484” with an appropriate value for your VPS’s memory.
+
+http://www.csgnetwork.com/memconv.html
+
+To revert the change, run:
+
+sudo rm /etc/security/limits.d/memlock.conf
+Changing the I/O (Input/Output) Scheduler
+We are going to permanently swap the I/O-scheduler to Kyber with the following block (note that this will work with all cases, meaning NVMe SSD, eMMC & microSD):
+
+(paste this into your terminal as one giant code block, do not run the commands individually)
+
+cat << EOF | sudo tee /etc/udev/rules.d/64-ioschedulers.rules
+ACTION=="add|change", KERNEL=="nvme[0-9]*", ATTR{queue/scheduler}="kyber"
+ACTION=="add|change", KERNEL=="sd[a-z]|mmcblk[0-9]*", ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="kyber"
+EOF
+
+To undo/revert this change:
+
+sudo rm /etc/udev/rules.d/64-ioschedulers.rules
+TCP Network Stack Optimization
+TCP Keepalive 
+Adjusts how long TCP should wait before sending keepalive messages to confirm that an idle connection is still active. This can help in managing connection overloads.
+
+(Adjust command values as needed)
+
+sysctl -w net.ipv4.tcp_keepalive_time=600
+sysctl -w net.ipv4.tcp_keepalive_probes=5
+sysctl -w net.ipv4.tcp_keepalive_intvl=60
+TCP Window Scaling 
+Enables TCP window size adjustments, allowing for larger buffers, which can improve data throughput for connections.
+
+(Adjust command value as needed)
+
+sysctl -w net.ipv4.tcp_window_scaling=1
+TCP SACK 
+The Selective Acknowledgment (SACK) feature allows devices to inform senders about lost packets, facilitating more efficient retransmissions.
+
+(Adjust command value as needed)
+
+sysctl -w net.ipv4.tcp_sack=1
+TCP FIN Timeout 
+Adjusts the timeout to close a connection, freeing up resources sooner.
+
+(Adjust command value as needed)
+
+sysctl -w net.ipv4.tcp_fin_timeout=30
+Increase TCP Max Syn Backlog 
+Determines the number of incoming connections that can be queued for handling.
+
+(Adjust command value as needed)
+
+sysctl -w net.ipv4.tcp_max_syn_backlog=2048
+Increase TCP Max Tw Buckets 
+Controls the maximum number of TCP sockets in TIME_WAIT state, managing memory use.
+
+(Adjust command value as needed)
+
+sysctl -w net.ipv4.tcp_max_tw_buckets=400000
+TCP Fast Open 
+Allows data to be sent during the initial SYN handshake, reducing latency for connections.
+
+(Adjust command value as needed)
+
+sysctl -w net.ipv4.tcp_fastopen=3
+
+Reversion Commands
+To revert TCP settings, you'll need to know the default values, which might vary based on your Linux distribution and version. Here are commands to set typical default values:
+
+sysctl -w net.ipv4.tcp_keepalive_time=7200
+sysctl -w net.ipv4.tcp_keepalive_probes=9
+sysctl -w net.ipv4.tcp_keepalive_intvl=75
+sysctl -w net.ipv4.tcp_window_scaling=1
+sysctl -w net.ipv4.tcp_sack=1
+sysctl -w net.ipv4.tcp_fin_timeout=60
+sysctl -w net.ipv4.tcp_max_syn_backlog=128
+sysctl -w net.ipv4.tcp_max_tw_buckets=5000
+sysctl -w net.ipv4.tcp_fastopen=0
+Enable Asynchronous I/O (AIO)
+Enable AIO to allow multiple I/O operations to execute concurrently, improving performance for database servers like MySQL
+innodb_use_native_aio = 1
+Offload Processing 
+Enable offloading features on your network interface to reduce CPU load
+ethtool -K eth0 gro on
+ethtool -K eth0 gso on
+ethtool -K eth0 tso on
+Increase Open File Limits
+Ensure your system can handle a large number of open files
+echo "fs.file-max = 500000" >> /etc/sysctl.conf
+ulimit -n 500000
+Enable Writeback Caching for Disk I/O
+Improve write performance by enabling writeback caching
+hdparm -W1 /dev/sda
+Store temporary files in memory to speed up read/write operations
+mount -t tmpfs -o size=512M tmpfs /tmp
+Optimize Memory Usage
+Use zram to compress RAM data to increase the amount of available memory
+apt-get install zram-config
+Optimize Virtual Memory Settings
+Adjust virtual memory settings for better performance
+sysctl -w vm.dirty_background_ratio=5
+sysctl -w vm.dirty_ratio=10
+Use CPU Isolation
+Isolate CPU cores for critical applications to ensure they have dedicated resources
+isolcpus=1,2
+Configure HugeTLB Pages
+For applications requiring large memory pages, configure HugeTLB to reduce TLB misses
+echo 'vm.nr_hugepages=128' >> /etc/sysctl.conf
+Optimize DNS Resolution
+Use a Local DNS Cache
+Install and configure a local DNS caching server like dnsmasq
+apt-get install dnsmasq
+Adjust Out-of-Memory (OOM) Killer Settings
+Prevent the OOM killer from terminating critical processes by adjusting oom_score_adj
+echo '-1000' > /proc/$(pidof critical_process)/oom_score_adj
+Use RAM Disks for High-Performance Temporary Storage
+Mount a portion of your RAM as a disk for extremely fast I/O operations
+mount -t tmpfs -o size=1G tmpfs /mnt/ramdisk
+Optimize Swap Settings
+Use zswap
+Enable and configure zswap for better swap performance
+echo 1 > /sys/module/zswap/parameters/enabled
+echo lz4 > /sys/module/zswap/parameters/compressor
+echo 20 > /sys/module/zswap/parameters/max_pool_percent
+Optimize Boot Parameters
+Modify boot parameters to improve performance
+GRUB_CMDLINE_LINUX_DEFAULT="quiet splash noapic noacpi nosplash irqpoll"
+Reduce Kernel Latency
+Enable kernel preemption and configure low-latency settings
+echo 1 > /sys/kernel/debug/sched_features
+Enable and Configure HugeTLBfs
+Use HugeTLBfs to allocate large pages for applications that can benefit from reduced TLB misses
+mount -t hugetlbfs none /dev/hugepages
+Configure Network Bonding
+Combine multiple network interfaces for increased bandwidth and redundancy
+apt-get install ifenslave
+echo "bonding" >> /etc/modules
+Fine-Tune TCP SYN Cookies
+Enable SYN cookies to protect against SYN flood attacks while allowing legitimate traffic.
+sysctl -w net.ipv4.tcp_syncookies=1
+Optimize ARP Cache Settings
+Tune ARP cache settings to handle large numbers of IP addresses efficiently
+sysctl -w net.ipv4.neigh.default.gc_thresh1=1024
+sysctl -w net.ipv4.neigh.default.gc_thresh2=2048
+sysctl -w net.ipv4.neigh.default.gc_thresh3=4096
+Enable IP Spoofing Protection
+Configure settings to prevent IP spoofing
+sysctl -w net.ipv4.conf.all.rp_filter=1
+sysctl -w net.ipv4.conf.default.rp_filter=1
+Optimize Kernel Shared Memory Parameters
+Adjust shared memory settings to improve performance for applications that use IPC (Inter-Process Communication)
+sysctl -w kernel.shmmax=68719476736
+sysctl -w kernel.shmall=4294967296
+Adjust VM Overcommit Settings
+Fine-tune memory overcommit behavior for better memory management
+sysctl -w vm.overcommit_memory=1
+sysctl -w vm.overcommit_ratio=50
+Enable and configure query caching in MySQL/MariaDB for faster query responses
+query_cache_size = 64M
+query_cache_type = ON
+Configure TCP Timestamps
+Enable or disable TCP timestamps based on your workload to improve performance
+sysctl -w net.ipv4.tcp_timestamps=1
+Adjust UDP Buffer Sizes
+Increase UDP buffer sizes for applications that use UDP heavily
+sysctl -w net.core.rmem_max=26214400
+sysctl -w net.core.wmem_max=26214400
+Optimize nf_conntrack Settings
+Adjust connection tracking settings for high-volume traffic
+sysctl -w net.netfilter.nf_conntrack_max=131072
+sysctl -w net.netfilter.nf_conntrack_tcp_timeout_established=1200
+Enable Disk Write Caching
+Enable write caching on disks to improve write performance
+hdparm -W1 /dev/sda
+Tune Systemd for Performance
+Reduce systemd's default timeout values for faster boot and shutdown
+DefaultTimeoutStartSec=10s
+DefaultTimeoutStopSec=10s
+Optimize NTP Synchronization
+Ensure accurate time synchronization with minimal overhead using chrony instead of ntpd
+apt-get install chrony
+Enable and Configure Network Interface Offloading
+Enable offloading features on network interfaces to reduce CPU usage
+ethtool -K eth0 gro on
+ethtool -K eth0 gso on
+ethtool -K eth0 tso on
+Implement Kernel Same-Page Merging (KSM)
+Enable KSM to merge identical memory pages between virtual machines
+echo 1 > /sys/kernel/mm/ksm/run
+Use High-Resolution Timers
+Enable high-resolution timers for applications that require precise timing
+echo "highres=on" >> /etc/default/grub
+update-grub
+Optimize sysctl Parameters for Network Performance
+Adjust various sysctl parameters to enhance network throughput and reduce latency
+sysctl -w net.ipv4.tcp_rfc1337=1
+sysctl -w net.ipv4.tcp_mtu_probing=1
+sysctl -w net.ipv4.tcp_base_mss=536
+Implement Disk Quotas for User Management
+Enable and configure disk quotas to manage user disk usage efficiently
+apt-get install quota
+Use Page-Cache Management Tools
+Use tools like vmtouch to manage and lock frequently accessed files in memory
+apt-get install vmtouch
+vmtouch -dl /path/to/important/files
+Optimize Swapping Behavior
+Configure vm.dirty_expire_centisecs and vm.dirty_writeback_centisecs for better swap performance
+sysctl -w vm.dirty_expire_centisecs=2000
+sysctl -w vm.dirty_writeback_centisecs=1000
+Implement Software RAID for Disk Performance
+Use software RAID to improve disk performance and redundancy
+mdadm --create --verbose /dev/md0 --level=1 --raid-devices=2 /dev/sda1 /dev/sdb1
+Optimize Kernel Timer Frequency
+Adjust the kernel timer frequency to reduce overhead
+echo 1000 > /proc/sys/kernel/timer_frequency
+Enable IPv6
+Enable and optimize IPv6 for better network performance and future-proofing
+sysctl -w net.ipv6.conf.all.disable_ipv6=0
+Use xfs_fsr for XFS File System Defragmentation
+Defragment XFS file systems to improve performance
+xfs_fsr /dev/sda1
+Optimize TCP Backlog Settings
+Increase TCP backlog settings to handle more simultaneous connections
+sysctl -w net.core.somaxconn=1024
+sysctl -w net.core.netdev_max_backlog=5000
+Use mdadm for Software RAID Management
+Manage software RAID arrays with mdadm
+mdadm --create --verbose /dev/md0 --level=1 --raid-devices=2 /dev/sda1 /dev/sdb1
+Implement TCP MSS Clamping
+Adjust TCP MSS (Maximum Segment Size) to avoid fragmentation
+iptables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
+Optimize TCP SYN Flood Protection
+Configure TCP SYN flood protection to prevent DoS attacks
+sysctl -w net.ipv4.tcp_syncookies=1
+Enable and Configure dnsmasq for DNS Caching
+Use dnsmasq to cache DNS queries and reduce lookup times
+apt-get install dnsmasq
+systemctl enable dnsmasq
+systemctl start dnsmasq
+Enable tcp_tw_recycle for Faster Connection Reuse
+Enable tcp_tw_recycle to speed up connection reuse
+sysctl -w net.ipv4.tcp_tw_recycle=1
+Use blktrace for Block Layer Tracing
+Install and use blktrace to trace block I/O operations
+apt-get install blktrace
+blktrace -d /dev/sda
+Adjust Kernel Panic Settings
+Configure the system to automatically reboot after a kernel panic
+sysctl -w kernel.panic=10
+sysctl -w kernel.panic_on_oops=1
+Optimize Inotify Watches
+Increase the number of inotify watches to handle more file events
+sysctl -w fs.inotify.max_user_watches=524288
+Enable TCP Window Scaling
+Improve TCP performance by enabling window scaling
+sysctl -w net.ipv4.tcp_window_scaling=1
+Enable TCP Keepalive Probes
+Configure TCP keepalive probes to manage idle connections
+sysctl -w net.ipv4.tcp_keepalive_time=300
+sysctl -w net.ipv4.tcp_keepalive_intvl=60
+sysctl -w net.ipv4.tcp_keepalive_probes=5
+Optimize TCP Congestion Control Algorithms
+Experiment with different TCP congestion control algorithms to find the best fit for your workload
+sysctl -w net.ipv4.tcp_congestion_control=bbr
+Use schedtool for Advanced CPU Scheduling
+Install and use schedtool to control CPU scheduling policies
+apt-get install schedtool
+schedtool -R -p 20 -e myapp
+Enable Kernel Samepage Merging (KSM)
+Use KSM to reduce memory usage by merging identical memory pages
+echo 1 > /sys/kernel/mm/ksm/run
+
+Optimize Network Buffer Sizes
+Increase network buffer sizes to handle high traffic volumes
+sysctl -w net.core.rmem_max=16777216
+sysctl -w net.core.wmem_max=16777216
+Optimize Kernel Scheduler
+Adjust kernel scheduler settings for better performance
+echo 1 > /proc/sys/kernel/sched_autogroup_enabled
+Adjust rcu Settings for Low-Latency Systems
+Tune Read-Copy Update (RCU) settings for low-latency performance
+echo 0 > /sys/kernel/rcu_expedited
+Optimize Filesystem Journaling
+Choose the appropriate journaling mode for your filesystem (e.g., data=writeback for ext4)
+mount -o remount,data=writeback /dev/sda1
+Enable and Configure BBRv2 TCP Congestion Control
+Use BBRv2 for even better TCP congestion control performance
+echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf
+sysctl -p
+Optimize File System Performance with tune2fs
+Use tune2fs to optimize ext4 filesystem parameters
+tune2fs -o journal_data_writeback /dev/sda1
+Use ethtool to Optimize NIC Settings
+Fine-tune NIC settings for better network performance
+ethtool -K eth0 tso off
+
+Enable and Configure Network Interface Teaming
+Use network interface teaming for load balancing and failover
+apt-get install ifenslave
+Use irqbalance for Balancing Interrupts
+Install and configure irqbalance to distribute interrupts across CPUs
+apt-get install irqbalance
+Tune Kernel Semaphore Parameters
+Adjust semaphore settings for better performance with IPC-heavy applications
+sysctl -w kernel.sem="250 32000 100 128"
+Configure and Use ethtool for Network Optimization
+Use ethtool to optimize network interface settings
+ethtool -K eth0 rx off tx off
+Enable TCP Small Queues (TSQ)
+Optimize the TCP stack by enabling TSQ
+sysctl -w net.ipv4.tcp_limit_output_bytes=131072
+Enable and Configure EarlyOOM
+Use EarlyOOM to handle out-of-memory situations more gracefully
+apt-get install earlyoom
+Optimize Inode Cache
+Adjust inode cache settings to handle large numbers of files
+sysctl -w fs.inode-nr
+sysctl -w fs.inode-state
+
+Optimize Disk Caching
+Adjust vm.dirty_ratio and vm.dirty_background_ratio to control disk caching behavior
+sysctl -w vm.dirty_ratio=20
+sysctl -w vm.dirty_background_ratio=10
+Implement IP Address Aliasing
+Use IP address aliasing to manage multiple IP addresses on a single network interface, improving network performance and management
+ip addr add 192.168.1.2/24 dev eth0
+Enable Asynchronous I/O for Database Servers
+Enable asynchronous I/O (AIO) for database servers like MySQL or PostgreSQL to improve disk I/O performance
+innodb_use_native_aio=1
+Optimize TCP Reassembly Settings
+Adjust TCP reassembly settings to handle fragmented packets more efficiently
+sysctl -w net.ipv4.tcp_reordering=3
+Enable jemalloc for Memory Allocation
+Use jemalloc as a memory allocator for applications like Nginx, MySQL, or Redis to improve memory management performance
+LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
+Adjust IO Elevator Algorithms
+Switch to a more suitable I/O elevator algorithm like mq-deadline or none for SSDs
+echo mq-deadline > /sys/block/sda/queue/scheduler
+Use fstrim for SSDs
+Periodically run fstrim to inform the SSD of unused blocks, improving performance
+fstrim -v /
+Optimize TCP Keepalive Settings
+Fine-tune TCP keepalive settings to manage idle connections better
+sysctl -w net.ipv4.tcp_keepalive_time=120
+sysctl -w net.ipv4.tcp_keepalive_intvl=30
+sysctl -w net.ipv4.tcp_keepalive_probes=5
+Optimize Virtual Memory Overcommit
+Adjust virtual memory overcommit settings to better handle memory allocation
+sysctl -w vm.overcommit_memory=2
+sysctl -w vm.overcommit_ratio=50
+Use ethtool for Network Interface Tuning
+Adjust network interface settings for better performance
+ethtool -K eth0 rx off tx off
+Implement BBRv2 TCP Congestion Control
+Use BBRv2 for enhanced TCP congestion control performance
+sysctl -w net.ipv4.tcp_congestion_control=bbr
+Optimize I/O Performance with blk-mq (Multi-Queue Block I/O Queueing Mechanism)
+Enable and configure blk-mq for better I/O performance on SSDs
+echo "mq-deadline" > /sys/block/sda/queue/scheduler
+Use schedtool to Control CPU Scheduling Policies
+Install and use schedtool to manage CPU scheduling
+apt-get install schedtool
+schedtool -R -p 20 -e /usr/bin/myapp
+Optimize TCP Retransmission Timeout (RTO)
+Adjust TCP RTO settings for better performance
+sysctl -w net.ipv4.tcp_retries2=5
+Optimize TCP SYN Cookies
+Enable TCP SYN cookies to protect against SYN flood attacks
+sysctl -w net.ipv4.tcp_syncookies=1
+Optimize TCP Window Scaling
+Enable TCP window scaling for better performance
+sysctl -w net.ipv4.tcp_window_scaling=1
+Use cgroups for Resource Management
+Implement cgroups to limit, prioritize, and isolate resource usage of processes
+cgcreate -g cpu,memory:mygroup
+cgset -r cpu.shares=512 mygroup
+cgset -r memory.limit_in_bytes=512M mygroup
+Optimize TCP Memory Buffers
+Adjust TCP memory buffer settings for better performance
+sysctl -w net.ipv4.tcp_rmem='4096 87380 16777216'
+sysctl -w net.ipv4.tcp_wmem='4096 65536 16777216'
+Optimize Kernel Schedulers
+Choose the appropriate I/O scheduler for your workload (noop for SSD)
+echo "noop" > /sys/block/sda/queue/scheduler
+Optimize Kernel Shared Memory Parameters
+Adjust shared memory settings for better performance with IPC-heavy applications
+sysctl -w kernel.shmmax=68719476736
+sysctl -w kernel.shmall=4294967296
+Implement ZFS for Advanced File System Features
+Use ZFS for better data integrity, snapshots, and performance
+apt-get install zfsutils-linux
+zpool create mypool /dev/sda
+Enable TCP Selective Acknowledgements (SACK)
+Optimize TCP performance with SACK
+sysctl -w net.ipv4.tcp_sack=1
+Enable and Configure zram for Compressed Swap
+Use zram to create a compressed block device in RAM
+apt-get install zram-config
+Implement TCP Timestamping
+Enable TCP timestamps for better performance and reliability
+sysctl -w net.ipv4.tcp_timestamps=1
+Use zpool for ZFS Pool Management
+Manage ZFS storage pools with zpool
+zpool create mypool /dev/sda
+Optimize File System Access Time
+Use noatime and nodiratime mount options to reduce disk I/O
+mount -o remount,noatime,nodiratime /
+Optimize TCP Backlog Size
+Increase TCP backlog size to handle more incoming connections
+sysctl -w net.core.somaxconn=1024
+Optimize Kernel Virtual Memory Settings
+Adjust Virtual Memory Settings For Better Performance and Optimize Kernel File Handle Limits
+Increase the number of file handles the kernel can manage
+sysctl -w fs.file-max=2097152
+Enable TCP Low Latency
+Configure TCP low latency mode for better responsiveness
+sysctl -w net.ipv4.tcp_low_latency=1
+Use pm2 for Node.js Process Management
+Install and use pm2 to manage Node.js processes
+npm install pm2@latest -g
+pm2 start app.js
+
+Note: Only applicable if using Node.js in Wordpress
+Implement Squid for Caching and Proxying
+Install and configure Squid for web caching and proxying
+apt-get install squid
+Optimize TCP Congestion Control for High Latency Networks
+Use a suitable TCP congestion control algorithm for high-latency networks
+sysctl -w net.ipv4.tcp_congestion_control=htcp
+Use cpulimit to Limit CPU Usage of Processes
+Install and use cpulimit to control the CPU usage of processes
+apt-get install cpulimit
+cpulimit -e myapp -l 50
+Optimize Disk Write Caching
+Enable disk write caching for better write performance
+hdparm -W1 /dev/sda
+
+Use noatime and nodiratime Mount Options
+Reduce disk I/O by disabling access time updates on filesystems
+
+mount -o remount,noatime,nodiratime /
+
+Adjust Maximum Transmission Unit (MTU) for Network Interfaces
+Increase MTU size for better performance on high-speed networks
+
+ip link set dev eth0 mtu 9000
+
+Tune Kernel Preemption Model
+Configure the kernel preemption model for low-latency desktop or high-throughput server workloads
+
+echo 0 > /proc/sys/kernel/preempt
+
+Optimize Disk I/O
+Increase Read-Ahead Buffer 
+Adjust the read-ahead buffer size for disk I/O
+
+blockdev --setra 2048 /dev/sda
+
+Optimize IRQ (Interrupt Request) Balancing
+Distribute IRQ load across multiple CPU cores to prevent bottlenecks
+
+apt-get install irqbalance
+
+systemctl enable irqbalance
+
+Use HugePages for Memory-Intensive Applications
+
+echo 'vm.nr_hugepages=128' >> /etc/sysctl.conf
+
+Use Lightweight Logging
+Reduce the verbosity of system logs to decrease disk I/O
+
+sed -i 's/^#LogLevel=info/LogLevel=error/' /etc/systemd/journald.conf
+
+Network Queue Management
+Queue Length
+
+Increasing the network interface queue length can help handle more packets during traffic bursts, reducing packet drops.
+(Adjust value as needed)
+
+ifconfig eth0 txqueuelen 10000
+
+Reversion Command
+Reset the transmission queue length to its default value (usually 1000):
+
+ifconfig eth0 txqueuelen 1000
+
+I/O Scheduler
+Choosing the right I/O scheduler can improve performance based on your workload characteristics (e.g., SSD vs HDD).
+Set I/O Scheduler
+
+For SSDs, noop or deadline might be better.
+
+echo "deadline" > /sys/block/sda/queue/scheduler
+
+Swappiness
+The vm.swappiness parameter controls the relative weight given to swapping out runtime memory, versus dropping pages from the system cache.
+
+Adjust Swappiness
+
+sysctl -w vm.swappiness=10
+
+Preventing the superfluous book-keeping of File Access Times
+The Linux kernel updates the access time of every file every time it would access it, meaning that even a read-only operation would immediately result in a write operation, because the access time of the file in question had to be updated.
+Therefore, let’s permanently switch over to the noatime setting with the following command:
+
+sudo sed -i -e '/home/s/\bdefaults\b/&,noatime/' /etc/fstab
+
+To undo/revert this change:
+
+sudo sed -i -e 's/,noatime//' /etc/fstab
+
+Reversion Commands
+
+File Descriptor Limits
+Reverting file descriptor limits involves setting them back to typical defaults:
+
+# System-wide
+echo "fs.file-max = 65535" >> /etc/sysctl.conf
+
+# Per-user
+echo "* soft nofile 1024" >> /etc/security/limits.conf
+echo "* hard nofile 4096" >> /etc/security/limits.conf
+
+I/O Scheduler
+
+To revert the I/O scheduler, you can switch back to the default. For many Linux systems, cfq (Completely Fair Queuing) is a common default for HDDs, and noop or mq-deadline for SSDs:
+
+echo "cfq" > /sys/block/sda/queue/scheduler
+
+Swappiness
+The default swappiness value is usually set at 60, which is suitable for most general-use cases:
+
+sysctl -w vm.swappiness=60
+
+Making Reversions Permanent
+
+To ensure these settings are permanent, update the /etc/sysctl.conf file with the reverted values and run:
+
+sysctl -p
+
+This command reloads the configurations from the sysctl.conf file.
