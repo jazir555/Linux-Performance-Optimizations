@@ -715,58 +715,88 @@ sysctl -w net.ipv4.tcp_wmem='4096 65536 16777216'
 
 Optimize Kernel Schedulers
 Choose the appropriate I/O scheduler for your workload (noop for SSD)
+
 echo "noop" > /sys/block/sda/queue/scheduler
+
 Optimize Kernel Shared Memory Parameters
 Adjust shared memory settings for better performance with IPC-heavy applications
+
 sysctl -w kernel.shmmax=68719476736
 sysctl -w kernel.shmall=4294967296
+
 Implement ZFS for Advanced File System Features
 Use ZFS for better data integrity, snapshots, and performance
+
 apt-get install zfsutils-linux
 zpool create mypool /dev/sda
+
 Enable TCP Selective Acknowledgements (SACK)
 Optimize TCP performance with SACK
+
 sysctl -w net.ipv4.tcp_sack=1
+
 Enable and Configure zram for Compressed Swap
 Use zram to create a compressed block device in RAM
+
 apt-get install zram-config
+
 Implement TCP Timestamping
 Enable TCP timestamps for better performance and reliability
+
 sysctl -w net.ipv4.tcp_timestamps=1
+
 Use zpool for ZFS Pool Management
 Manage ZFS storage pools with zpool
+
 zpool create mypool /dev/sda
+
 Optimize File System Access Time
 Use noatime and nodiratime mount options to reduce disk I/O
+
 mount -o remount,noatime,nodiratime /
+
 Optimize TCP Backlog Size
 Increase TCP backlog size to handle more incoming connections
+
 sysctl -w net.core.somaxconn=1024
+
 Optimize Kernel Virtual Memory Settings
 Adjust Virtual Memory Settings For Better Performance and Optimize Kernel File Handle Limits
 Increase the number of file handles the kernel can manage
+
 sysctl -w fs.file-max=2097152
+
 Enable TCP Low Latency
 Configure TCP low latency mode for better responsiveness
+
 sysctl -w net.ipv4.tcp_low_latency=1
-Use pm2 for Node.js Process Management
+
+Use pm2 for Node.js Process Management **(VPS'S USING NODE.JS ONLY)**
 Install and use pm2 to manage Node.js processes
 npm install pm2@latest -g
 pm2 start app.js
 
 Note: Only applicable if using Node.js in Wordpress
-Implement Squid for Caching and Proxying
+
+Implement Squid for Caching and Proxying (VPS'S ONLY)
 Install and configure Squid for web caching and proxying
+
 apt-get install squid
+
 Optimize TCP Congestion Control for High Latency Networks
 Use a suitable TCP congestion control algorithm for high-latency networks
+
 sysctl -w net.ipv4.tcp_congestion_control=htcp
+
 Use cpulimit to Limit CPU Usage of Processes
 Install and use cpulimit to control the CPU usage of processes
+
 apt-get install cpulimit
 cpulimit -e myapp -l 50
+
 Optimize Disk Write Caching
 Enable disk write caching for better write performance
+
 hdparm -W1 /dev/sda
 
 Use noatime and nodiratime Mount Options
