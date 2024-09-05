@@ -1,5 +1,6 @@
 Optimizing Linux
 Disable THP
+
 https://www.pingcap.com/blog/transparent-huge-pages-why-we-disable-it-for-databases/
 
 Tuned-ADM
@@ -238,57 +239,88 @@ sysctl -w net.ipv4.tcp_fin_timeout=60
 sysctl -w net.ipv4.tcp_max_syn_backlog=128
 sysctl -w net.ipv4.tcp_max_tw_buckets=5000
 sysctl -w net.ipv4.tcp_fastopen=0
+
 Enable Asynchronous I/O (AIO)
-Enable AIO to allow multiple I/O operations to execute concurrently, improving performance for database servers like MySQL
+Enable AIO to allow multiple I/O operations to execute concurrently, improving performance for database servers like MySQL (WORDPRESS AND WEBSERVERS ONLY)
+
 innodb_use_native_aio = 1
+
 Offload Processing 
 Enable offloading features on your network interface to reduce CPU load
+
 ethtool -K eth0 gro on
 ethtool -K eth0 gso on
 ethtool -K eth0 tso on
+
 Increase Open File Limits
 Ensure your system can handle a large number of open files
+
 echo "fs.file-max = 500000" >> /etc/sysctl.conf
 ulimit -n 500000
+
 Enable Writeback Caching for Disk I/O
 Improve write performance by enabling writeback caching
+
 hdparm -W1 /dev/sda
+
 Store temporary files in memory to speed up read/write operations
+
 mount -t tmpfs -o size=512M tmpfs /tmp
+
 Optimize Memory Usage
 Use zram to compress RAM data to increase the amount of available memory
+
 apt-get install zram-config
+
 Optimize Virtual Memory Settings
 Adjust virtual memory settings for better performance
+
 sysctl -w vm.dirty_background_ratio=5
 sysctl -w vm.dirty_ratio=10
+
 Use CPU Isolation
 Isolate CPU cores for critical applications to ensure they have dedicated resources
+
 isolcpus=1,2
+
 Configure HugeTLB Pages
 For applications requiring large memory pages, configure HugeTLB to reduce TLB misses
+
 echo 'vm.nr_hugepages=128' >> /etc/sysctl.conf
+
 Optimize DNS Resolution
 Use a Local DNS Cache
 Install and configure a local DNS caching server like dnsmasq
+
 apt-get install dnsmasq
+
 Adjust Out-of-Memory (OOM) Killer Settings
+
 Prevent the OOM killer from terminating critical processes by adjusting oom_score_adj
+
 echo '-1000' > /proc/$(pidof critical_process)/oom_score_adj
+
 Use RAM Disks for High-Performance Temporary Storage
 Mount a portion of your RAM as a disk for extremely fast I/O operations
+
 mount -t tmpfs -o size=1G tmpfs /mnt/ramdisk
+
 Optimize Swap Settings
 Use zswap
+
 Enable and configure zswap for better swap performance
 echo 1 > /sys/module/zswap/parameters/enabled
 echo lz4 > /sys/module/zswap/parameters/compressor
 echo 20 > /sys/module/zswap/parameters/max_pool_percent
+
 Optimize Boot Parameters
-Modify boot parameters to improve performance
+Modify boot parameters to improve performance (ONLY FOR THE GRUB BOOTLOADER, CONFIRM WHAT BOOTLOADER YOU ARE USING BEFORE RUNNING THIS).
+
 GRUB_CMDLINE_LINUX_DEFAULT="quiet splash noapic noacpi nosplash irqpoll"
+
 Reduce Kernel Latency
 Enable kernel preemption and configure low-latency settings
+
 echo 1 > /sys/kernel/debug/sched_features
 Enable and Configure HugeTLBfs
 Use HugeTLBfs to allocate large pages for applications that can benefit from reduced TLB misses
