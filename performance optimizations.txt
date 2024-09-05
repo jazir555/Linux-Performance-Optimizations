@@ -16,13 +16,16 @@ https://github.com/sn99/Optimizing-linux
 
 Great repo for how to optimize linux performance.
 Stacer
+
 https://www.site24x7.com/learn/linux/linux-performance-optimization.html
 
 Stacer is a tool used for optimizing Linux that deletes unwanted cache and sorting processes by looking at memory usage and CPU. Stacer reveals how services and processes are performing and which user is executing the processes. 
 
 Performance Optimization Tools and Techniques
+
 https://linuxconfig.org/linux-performance-optimization-tools-and-techniques
 Enable Z-Swap
+
 https://blog.jacobstoner.com/zswap-improve-memory-performance-on-linux/
 
 sudo perl -pi -e 's/^(GRUB_CMDLINE_LINUX_DEFAULT.*)"$/$1 zswap.enabled=1 
@@ -36,13 +39,16 @@ sudo echo -e 'lz4\nlz4_compress\nz3fold' >> /etc/initramfs-tools/modules
 sudo update-initramfs -u
 
 sudo reboot
+
 Tune the Linux Filesystem for increased performance
 Foss Linux Article
 https://www.fosslinux.com/111937/tips-and-tricks-for-optimizing-linux-device-performance.htm
 
 Semi-suface level, but slightly different info than the linux.com article, best to use both of the many listed techniques together.
 Use a Custom Kernel
+
 https://www.fosslinux.com/111937/tips-and-tricks-for-optimizing-linux-device-performance.htm
+
 Disable Unnecessary Linux Services
 To list all services, you can use this command:
 
@@ -51,6 +57,7 @@ systemctl list-unit-files --type=service
 Then, to disable a service, use:
 
 sudo systemctl disable SERVICE_NAME
+
 Jumbo Frames
 Enabling Jumbo Frames:
 
@@ -63,8 +70,10 @@ Enabling Jumbo Frames:
 ●	Remember to configure Jumbo Frames on all devices in your network to avoid packet fragmentation.
 
 Jumbo Frames can help reduce CPU load by decreasing the number of packets processed, but it's crucial to ensure that all network equipment supports them to avoid potential network issues. Contact your hosting provider to ensure enabling this feature is supported.
+
 TCP BBR
 Increase Linux Internet speed with TCP BBR congestion control
+
 https://www.cyberciti.biz/cloud-computing/increase-your-linux-server-internet-speed-with-tcp-bbr-congestion-control/
 
 https://www.techrepublic.com/article/how-to-enable-tcp-bbr-to-improve-network-speed-on-linux/
@@ -74,19 +83,23 @@ https://www.linuxbabe.com/ubuntu/enable-google-tcp-bbr-ubuntu
 https://github.com/systemd/systemd/issues/9725#issuecomment-413369212
 
 https://djangocas.dev/blog/huge-improve-network-performance-by-change-tcp-congestion-control-to-bbr/
-Linux Network Performance Parameters
-https://github.com/leandromoreira/linux-network-performance-parameters
-Intel’s VPS Wordpress Tuning guide for Xeon Systems
-https://www.intel.com/content/www/us/en/developer/articles/guide/wordpress-tuning-guide-on-xeon-systems.html
-Linux Optimization suggestions for the Steam Deck
-These are Linux optimizations for the Steam Deck, however they are also applicable to Linux VPS optimization. Below is the Medium article I pulled these commands from, as well as reversion commands for each of these optimization features in case you want to revert for any reason.
 
-Paste all of these commands as one single code block, not single lines one at a time. The reversion commands should not be run together with the commands to enable these features, only if you want to disable them and revert back to stock. 
+Linux Network Performance Parameters
+
+https://github.com/leandromoreira/linux-network-performance-parameters
+
+Intel’s VPS Wordpress Tuning guide for Xeon Systems
+
+https://www.intel.com/content/www/us/en/developer/articles/guide/wordpress-tuning-guide-on-xeon-systems.html
+
 Medium Article
+
 https://medium.com/@a.b.t./here-are-some-possibly-useful-tweaks-for-steamos-on-the-steam-deck-fcb6b571b577#6c57
 Switching over to the “performance” CPU governor at start-up
 
 (paste this into your terminal as one giant code block, do not run the commands individually)
+
+-------------------------------------------
 
 cat << EOF | sudo tee /etc/systemd/system/cpu_performance.service
 [Unit]
@@ -100,21 +113,26 @@ EOF
 sudo systemctl daemon-reload
 sudo systemctl enable cpu_performance.service
 
+-------------------------------------------
+
 To undo or revert this change, run: 
 
 sudo systemctl disable cpu_performance.service
 MGLRU (Multi-Gen. Least Recently Used)
+
 This is one of the most recent additions to the upstream Linux kernel, literally just merged for the 6.1 LTS (Long-Term Support). However, the upstream kernel doesn’t enable this functionality by default, yet.
 
 (paste this into your terminal as one giant code block, do not run the commands individually)
 
 To enable this feature, run the terminal command:
 
+--------------------------------
+
 cat << EOF | sudo tee /etc/tmpfiles.d/mglru.conf
 w /sys/kernel/mm/lru_gen/enabled - - - - 7
 w /sys/kernel/mm/lru_gen/min_ttl_ms - - - - 0
 EOF
-
+--------------------------------
 Reversion command:
 
 sudo rm /etc/tmpfiles.d/mglru.conf
