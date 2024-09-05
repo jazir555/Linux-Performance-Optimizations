@@ -1,9 +1,13 @@
 Optimizing Linux
 Disable THP
 https://www.pingcap.com/blog/transparent-huge-pages-why-we-disable-it-for-databases/
+
 Tuned-ADM
+
 https://manpages.ubuntu.com/manpages/jammy/man7/tuned-profiles.7.html
-Change Init Level to 3
+
+Change Init Level to 3 **(ONLY FOR VPS's HOSTING WORDPRESS SITES, this disables the Desktop GUI)**
+
 Set your init level to 3 if the default is set to 5. Use the command “init 3” to set the init level to 3, then reboot for the changes to take effect. You can click the link below for instructions on how to do so.
 
 https://www.cyberciti.biz/howto/question/linux/changing-run-levels-3-5.php
@@ -12,9 +16,11 @@ More info on that here
 
 This link is how to do the reverse, changing 5 to 3 if the “init 3” command does not work. If your run level is set to 5, change it to 3.
 Optimizing Linux Github
+
 https://github.com/sn99/Optimizing-linux
 
 Great repo for how to optimize linux performance.
+
 Stacer
 
 https://www.site24x7.com/learn/linux/linux-performance-optimization.html
@@ -24,10 +30,10 @@ Stacer is a tool used for optimizing Linux that deletes unwanted cache and sorti
 Performance Optimization Tools and Techniques
 
 https://linuxconfig.org/linux-performance-optimization-tools-and-techniques
+
 Enable Z-Swap
-
 https://blog.jacobstoner.com/zswap-improve-memory-performance-on-linux/
-
+---------------------
 sudo perl -pi -e 's/^(GRUB_CMDLINE_LINUX_DEFAULT.*)"$/$1 zswap.enabled=1 
 
 zswap.compressor=lz4 zswap.zpool=z3fold zswap.max_pool_percent=25"/' /etc/default/grub
@@ -39,9 +45,10 @@ sudo echo -e 'lz4\nlz4_compress\nz3fold' >> /etc/initramfs-tools/modules
 sudo update-initramfs -u
 
 sudo reboot
-
+---------------------
 Tune the Linux Filesystem for increased performance
 Foss Linux Article
+
 https://www.fosslinux.com/111937/tips-and-tricks-for-optimizing-linux-device-performance.htm
 
 Semi-suface level, but slightly different info than the linux.com article, best to use both of the many listed techniques together.
@@ -50,6 +57,7 @@ Use a Custom Kernel
 https://www.fosslinux.com/111937/tips-and-tricks-for-optimizing-linux-device-performance.htm
 
 Disable Unnecessary Linux Services
+
 To list all services, you can use this command:
 
 systemctl list-unit-files --type=service
@@ -142,12 +150,12 @@ By default, the Linux kernel sets this particular value to just 64KiB, which is 
 This command will set this value to 2 GB, adjust as needed depending on your server’s RAM capacity:
 
 (paste this into your terminal as one giant code block, do not run the commands individually)
-
+-------------------
 cat << EOF | sudo tee /etc/security/limits.d/memlock.conf
 * hard memlock 2147484
 * soft memlock 2147484
 EOF
-
+-------------------
 This site will help you convert the values so you can replace the above value “2147484” with an appropriate value for your VPS’s memory.
 
 http://www.csgnetwork.com/memconv.html
@@ -155,19 +163,22 @@ http://www.csgnetwork.com/memconv.html
 To revert the change, run:
 
 sudo rm /etc/security/limits.d/memlock.conf
+
 Changing the I/O (Input/Output) Scheduler
 We are going to permanently swap the I/O-scheduler to Kyber with the following block (note that this will work with all cases, meaning NVMe SSD, eMMC & microSD):
 
 (paste this into your terminal as one giant code block, do not run the commands individually)
+------------------
 
 cat << EOF | sudo tee /etc/udev/rules.d/64-ioschedulers.rules
 ACTION=="add|change", KERNEL=="nvme[0-9]*", ATTR{queue/scheduler}="kyber"
 ACTION=="add|change", KERNEL=="sd[a-z]|mmcblk[0-9]*", ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="kyber"
 EOF
-
+------------------
 To undo/revert this change:
 
 sudo rm /etc/udev/rules.d/64-ioschedulers.rules
+
 TCP Network Stack Optimization
 TCP Keepalive 
 Adjusts how long TCP should wait before sending keepalive messages to confirm that an idle connection is still active. This can help in managing connection overloads.
@@ -177,6 +188,7 @@ Adjusts how long TCP should wait before sending keepalive messages to confirm th
 sysctl -w net.ipv4.tcp_keepalive_time=600
 sysctl -w net.ipv4.tcp_keepalive_probes=5
 sysctl -w net.ipv4.tcp_keepalive_intvl=60
+
 TCP Window Scaling 
 Enables TCP window size adjustments, allowing for larger buffers, which can improve data throughput for connections.
 
