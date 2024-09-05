@@ -390,79 +390,120 @@ Enable Disk Write Caching
 Enable write caching on disks to improve write performance
 
 hdparm -W1 /dev/sda
+
 Tune Systemd for Performance
 Reduce systemd's default timeout values for faster boot and shutdown
+
 DefaultTimeoutStartSec=10s
 DefaultTimeoutStopSec=10s
+
 Optimize NTP Synchronization
 Ensure accurate time synchronization with minimal overhead using chrony instead of ntpd
+
 apt-get install chrony
+
 Enable and Configure Network Interface Offloading
 Enable offloading features on network interfaces to reduce CPU usage
+
 ethtool -K eth0 gro on
 ethtool -K eth0 gso on
 ethtool -K eth0 tso on
+
 Implement Kernel Same-Page Merging (KSM)
 Enable KSM to merge identical memory pages between virtual machines
+
 echo 1 > /sys/kernel/mm/ksm/run
-Use High-Resolution Timers
+
+Use High-Resolution Timers (ONLY FOR THE GRUB BOOTLOADER, CONFIRM WHAT BOOTLOADER YOUR DEVICE IS USING)
 Enable high-resolution timers for applications that require precise timing
+
 echo "highres=on" >> /etc/default/grub
 update-grub
+
 Optimize sysctl Parameters for Network Performance
+
 Adjust various sysctl parameters to enhance network throughput and reduce latency
 sysctl -w net.ipv4.tcp_rfc1337=1
 sysctl -w net.ipv4.tcp_mtu_probing=1
 sysctl -w net.ipv4.tcp_base_mss=536
+
 Implement Disk Quotas for User Management
 Enable and configure disk quotas to manage user disk usage efficiently
+
 apt-get install quota
 Use Page-Cache Management Tools
-Use tools like vmtouch to manage and lock frequently accessed files in memory
+Use tools like vmtouch to manage and lock frequently accessed files in memory (ONLY FOR WEBSERVERS/VPS'S)
+
 apt-get install vmtouch
 vmtouch -dl /path/to/important/files
+
 Optimize Swapping Behavior
 Configure vm.dirty_expire_centisecs and vm.dirty_writeback_centisecs for better swap performance
+
 sysctl -w vm.dirty_expire_centisecs=2000
 sysctl -w vm.dirty_writeback_centisecs=1000
+
 Implement Software RAID for Disk Performance
 Use software RAID to improve disk performance and redundancy
+
 mdadm --create --verbose /dev/md0 --level=1 --raid-devices=2 /dev/sda1 /dev/sdb1
+
 Optimize Kernel Timer Frequency
 Adjust the kernel timer frequency to reduce overhead
+
 echo 1000 > /proc/sys/kernel/timer_frequency
+
 Enable IPv6
 Enable and optimize IPv6 for better network performance and future-proofing
+
 sysctl -w net.ipv6.conf.all.disable_ipv6=0
+
 Use xfs_fsr for XFS File System Defragmentation
 Defragment XFS file systems to improve performance
+
 xfs_fsr /dev/sda1
+
 Optimize TCP Backlog Settings
 Increase TCP backlog settings to handle more simultaneous connections
+
 sysctl -w net.core.somaxconn=1024
 sysctl -w net.core.netdev_max_backlog=5000
+
 Use mdadm for Software RAID Management
 Manage software RAID arrays with mdadm
+
 mdadm --create --verbose /dev/md0 --level=1 --raid-devices=2 /dev/sda1 /dev/sdb1
+
 Implement TCP MSS Clamping
 Adjust TCP MSS (Maximum Segment Size) to avoid fragmentation
+
 iptables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
+
 Optimize TCP SYN Flood Protection
 Configure TCP SYN flood protection to prevent DoS attacks
+
 sysctl -w net.ipv4.tcp_syncookies=1
+
 Enable and Configure dnsmasq for DNS Caching
 Use dnsmasq to cache DNS queries and reduce lookup times
+
 apt-get install dnsmasq
 systemctl enable dnsmasq
 systemctl start dnsmasq
+
 Enable tcp_tw_recycle for Faster Connection Reuse
 Enable tcp_tw_recycle to speed up connection reuse
+
 sysctl -w net.ipv4.tcp_tw_recycle=1
+
 Use blktrace for Block Layer Tracing
 Install and use blktrace to trace block I/O operations
+
 apt-get install blktrace
 blktrace -d /dev/sda
+
 Adjust Kernel Panic Settings
+
 Configure the system to automatically reboot after a kernel panic
 sysctl -w kernel.panic=10
 sysctl -w kernel.panic_on_oops=1
