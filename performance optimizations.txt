@@ -322,49 +322,73 @@ Reduce Kernel Latency
 Enable kernel preemption and configure low-latency settings
 
 echo 1 > /sys/kernel/debug/sched_features
+
 Enable and Configure HugeTLBfs
 Use HugeTLBfs to allocate large pages for applications that can benefit from reduced TLB misses
+
 mount -t hugetlbfs none /dev/hugepages
+
 Configure Network Bonding
 Combine multiple network interfaces for increased bandwidth and redundancy
+
 apt-get install ifenslave
 echo "bonding" >> /etc/modules
+
 Fine-Tune TCP SYN Cookies
 Enable SYN cookies to protect against SYN flood attacks while allowing legitimate traffic.
+
 sysctl -w net.ipv4.tcp_syncookies=1
+
 Optimize ARP Cache Settings
 Tune ARP cache settings to handle large numbers of IP addresses efficiently
+
 sysctl -w net.ipv4.neigh.default.gc_thresh1=1024
 sysctl -w net.ipv4.neigh.default.gc_thresh2=2048
 sysctl -w net.ipv4.neigh.default.gc_thresh3=4096
+
 Enable IP Spoofing Protection
 Configure settings to prevent IP spoofing
+
 sysctl -w net.ipv4.conf.all.rp_filter=1
 sysctl -w net.ipv4.conf.default.rp_filter=1
+
 Optimize Kernel Shared Memory Parameters
 Adjust shared memory settings to improve performance for applications that use IPC (Inter-Process Communication)
+
 sysctl -w kernel.shmmax=68719476736
 sysctl -w kernel.shmall=4294967296
+
 Adjust VM Overcommit Settings
 Fine-tune memory overcommit behavior for better memory management
+
 sysctl -w vm.overcommit_memory=1
 sysctl -w vm.overcommit_ratio=50
+
 Enable and configure query caching in MySQL/MariaDB for faster query responses
+
 query_cache_size = 64M
 query_cache_type = ON
+
 Configure TCP Timestamps
 Enable or disable TCP timestamps based on your workload to improve performance
+
 sysctl -w net.ipv4.tcp_timestamps=1
+
 Adjust UDP Buffer Sizes
 Increase UDP buffer sizes for applications that use UDP heavily
+
 sysctl -w net.core.rmem_max=26214400
 sysctl -w net.core.wmem_max=26214400
+
 Optimize nf_conntrack Settings
 Adjust connection tracking settings for high-volume traffic
+
 sysctl -w net.netfilter.nf_conntrack_max=131072
 sysctl -w net.netfilter.nf_conntrack_tcp_timeout_established=1200
+
 Enable Disk Write Caching
 Enable write caching on disks to improve write performance
+
 hdparm -W1 /dev/sda
 Tune Systemd for Performance
 Reduce systemd's default timeout values for faster boot and shutdown
