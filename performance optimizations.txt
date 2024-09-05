@@ -617,66 +617,102 @@ sysctl -w fs.inode-state
 
 Optimize Disk Caching
 Adjust vm.dirty_ratio and vm.dirty_background_ratio to control disk caching behavior
+
 sysctl -w vm.dirty_ratio=20
 sysctl -w vm.dirty_background_ratio=10
+
 Implement IP Address Aliasing
 Use IP address aliasing to manage multiple IP addresses on a single network interface, improving network performance and management
+
 ip addr add 192.168.1.2/24 dev eth0
+
 Enable Asynchronous I/O for Database Servers
 Enable asynchronous I/O (AIO) for database servers like MySQL or PostgreSQL to improve disk I/O performance
+
 innodb_use_native_aio=1
+
 Optimize TCP Reassembly Settings
 Adjust TCP reassembly settings to handle fragmented packets more efficiently
+
 sysctl -w net.ipv4.tcp_reordering=3
+
 Enable jemalloc for Memory Allocation
-Use jemalloc as a memory allocator for applications like Nginx, MySQL, or Redis to improve memory management performance
+Use jemalloc as a memory allocator for applications like Nginx, MySQL, or Redis to improve memory management performance **(ONLY FOR VPS'S)**
+
 LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
+
 Adjust IO Elevator Algorithms
 Switch to a more suitable I/O elevator algorithm like mq-deadline or none for SSDs
+
 echo mq-deadline > /sys/block/sda/queue/scheduler
+
 Use fstrim for SSDs
 Periodically run fstrim to inform the SSD of unused blocks, improving performance
+
 fstrim -v /
+
 Optimize TCP Keepalive Settings
 Fine-tune TCP keepalive settings to manage idle connections better
+
 sysctl -w net.ipv4.tcp_keepalive_time=120
 sysctl -w net.ipv4.tcp_keepalive_intvl=30
 sysctl -w net.ipv4.tcp_keepalive_probes=5
+
 Optimize Virtual Memory Overcommit
 Adjust virtual memory overcommit settings to better handle memory allocation
+
 sysctl -w vm.overcommit_memory=2
 sysctl -w vm.overcommit_ratio=50
+
 Use ethtool for Network Interface Tuning
 Adjust network interface settings for better performance
+
 ethtool -K eth0 rx off tx off
+
 Implement BBRv2 TCP Congestion Control
 Use BBRv2 for enhanced TCP congestion control performance
+
 sysctl -w net.ipv4.tcp_congestion_control=bbr
+
 Optimize I/O Performance with blk-mq (Multi-Queue Block I/O Queueing Mechanism)
 Enable and configure blk-mq for better I/O performance on SSDs
+
 echo "mq-deadline" > /sys/block/sda/queue/scheduler
+
 Use schedtool to Control CPU Scheduling Policies
 Install and use schedtool to manage CPU scheduling
+
 apt-get install schedtool
 schedtool -R -p 20 -e /usr/bin/myapp
+
 Optimize TCP Retransmission Timeout (RTO)
 Adjust TCP RTO settings for better performance
+
 sysctl -w net.ipv4.tcp_retries2=5
+
 Optimize TCP SYN Cookies
 Enable TCP SYN cookies to protect against SYN flood attacks
+
 sysctl -w net.ipv4.tcp_syncookies=1
+
 Optimize TCP Window Scaling
 Enable TCP window scaling for better performance
+
 sysctl -w net.ipv4.tcp_window_scaling=1
+
 Use cgroups for Resource Management
 Implement cgroups to limit, prioritize, and isolate resource usage of processes
+
 cgcreate -g cpu,memory:mygroup
 cgset -r cpu.shares=512 mygroup
 cgset -r memory.limit_in_bytes=512M mygroup
+
 Optimize TCP Memory Buffers
 Adjust TCP memory buffer settings for better performance
+
 sysctl -w net.ipv4.tcp_rmem='4096 87380 16777216'
 sysctl -w net.ipv4.tcp_wmem='4096 65536 16777216'
+
 Optimize Kernel Schedulers
 Choose the appropriate I/O scheduler for your workload (noop for SSD)
 echo "noop" > /sys/block/sda/queue/scheduler
