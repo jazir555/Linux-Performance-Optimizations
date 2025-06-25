@@ -799,11 +799,6 @@ Enable disk write caching for better write performance
 
 hdparm -W1 /dev/sda
 
-Use noatime and nodiratime Mount Options
-Reduce disk I/O by disabling access time updates on filesystems
-
-mount -o remount,noatime,nodiratime /
-
 Adjust Maximum Transmission Unit (MTU) for Network Interfaces
 Increase MTU size for better performance on high-speed networks
 
